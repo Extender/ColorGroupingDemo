@@ -360,9 +360,9 @@ void MainWindow::groupAreasBtnClicked(bool clicked)
             int32_t lowestErrorY=-1;
 
             uint32_t thisColor=bmpData[thisPos];
-            uint32_t thisRComponent=(thisColor>>16)&0xff;
-            uint32_t thisGComponent=(thisColor>>8)&0xff;
-            uint32_t thisBComponent=thisColor&0xff;
+            uint8_t thisRComponent=(thisColor>>16)&0xff;
+            uint8_t thisGComponent=(thisColor>>8)&0xff;
+            uint8_t thisBComponent=thisColor&0xff;
             double thisR=((double)thisRComponent)/255.0;
             double thisG=((double)thisGComponent)/255.0;
             double thisB=((double)thisBComponent)/255.0;
@@ -399,9 +399,9 @@ void MainWindow::groupAreasBtnClicked(bool clicked)
                         continue;
 
                     uint32_t cmpColor=bmpData[cmpPos];
-                    uint32_t cmpRComponent=(cmpColor>>16)&0xff;
-                    uint32_t cmpGComponent=(cmpColor>>8)&0xff;
-                    uint32_t cmpBComponent=cmpColor&0xff;
+                    uint8_t cmpRComponent=(cmpColor>>16)&0xff;
+                    uint8_t cmpGComponent=(cmpColor>>8)&0xff;
+                    uint8_t cmpBComponent=cmpColor&0xff;
                     double cmpR=((double)cmpRComponent)/255.0;
                     double cmpG=((double)cmpGComponent)/255.0;
                     double cmpB=((double)cmpBComponent)/255.0;
