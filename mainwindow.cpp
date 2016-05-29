@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->colorGroupingKernelSizeBox->setValue(1);
     ui->colorGroupingToleranceBox->setValue(0.2);
 
-    QString proposedFile=QApplication::applicationDirPath().replace("/","\\")+"\\example.bmp";
+    QString proposedFile=QApplication::applicationDirPath().replace("/","\\")+"\\example.jpg";
     QFile f(proposedFile);
     if(f.exists())
     {
@@ -165,7 +165,27 @@ uint32_t *MainWindow::qImageToBitmapData(QImage *image)
     return out;
 }
 
-uint32_t *MainWindow::getImageFromChannelDoubleArrays(double *rChannel, double *gChannel, double *bChannel, int32_t width, int32_t height)
+uint32_t *MainWindow::getImageFromARGBChannelDoubleArrays(double *aChannel, double *rChannel, double *gChannel, double *bChannel, int32_t width, int32_t height)
+{
+    uint32_t *out=(uint32_t*)malloc(width*height*sizeof(uint32_t));
+    for(int32_t y=0;y<height;y++)
+    {
+        int32_t offset=y*width;
+        for(int32_t x=0;x<width;x++)
+        {
+            int32_t pos=offset+x;
+            uint32_t alpha=round(aChannel[pos]*255.0);
+            uint32_t red=round(rChannel[pos]*255.0);
+            uint32_t green=round(gChannel[pos]*255.0);
+            uint32_t blue=round(bChannel[pos]*255.0);
+            uint32_t outColor=(alpha<<24)|(red<<16)|(green<<8)|blue;
+            out[pos]=outColor;
+        }
+    }
+    return out;
+}
+
+uint32_t *MainWindow::getImageFromRGBChannelDoubleArrays(double *rChannel, double *gChannel, double *bChannel, int32_t width, int32_t height)
 {
     uint32_t *out=(uint32_t*)malloc(width*height*sizeof(uint32_t));
     for(int32_t y=0;y<height;y++)
@@ -198,6 +218,22 @@ double *MainWindow::getBWDoubleArrayFromImage(uint32_t *image, int32_t width, in
             double g=((double)((color>>8)&0xff))/255.0;
             double b=((double)(color&0xff))/255.0;
             out[offset+x]=(0.2126*r+0.7152*g+0.0722*b);
+        }
+    }
+    return out;
+}
+
+double *MainWindow::getAlphaChannelDoubleArrayFromImage(uint32_t *image, int32_t width, int32_t height)
+{
+    double *out=(double*)malloc(width*height*sizeof(double));
+    for(int32_t y=0;y<height;y++)
+    {
+        int32_t offset=y*width;
+        for(int32_t x=0;x<width;x++)
+        {
+            uint32_t color=image[offset+x];
+            double value=((double)((color>>24)&0xff))/255.0;
+            out[offset+x]=value;
         }
     }
     return out;
@@ -249,6 +285,57 @@ double *MainWindow::getBlueChannelDoubleArrayFromImage(uint32_t *image, int32_t 
         }
     }
     return out;
+}
+
+void MainWindow::getRGBChannelsFromImage(uint32_t *image, int32_t width, int32_t height, double *&rChannel, double *&gChannel, double *&bChannel)
+{
+    uint32_t widthAndHeightBasedDoubleArraySize=width*height*sizeof(double);
+    rChannel=(double*)malloc(widthAndHeightBasedDoubleArraySize);
+    gChannel=(double*)malloc(widthAndHeightBasedDoubleArraySize);
+    bChannel=(double*)malloc(widthAndHeightBasedDoubleArraySize);
+
+    for(int32_t y=0;y<height;y++)
+    {
+        int32_t offset=y*width;
+        for(int32_t x=0;x<width;x++)
+        {
+            uint32_t pos=offset+x;
+            uint32_t color=image[pos];
+            double r=((double)((color>>16)&0xff))/255.0;
+            double g=((double)((color>>8)&0xff))/255.0;
+            double b=((double)(color&0xff))/255.0;
+            rChannel[pos]=r;
+            gChannel[pos]=g;
+            bChannel[pos]=b;
+        }
+    }
+}
+
+void MainWindow::getARGBChannelsFromImage(uint32_t *image, int32_t width, int32_t height, double *&aChannel, double *&rChannel, double *&gChannel, double *&bChannel)
+{
+    uint32_t widthAndHeightBasedDoubleArraySize=width*height*sizeof(double);
+    aChannel=(double*)malloc(widthAndHeightBasedDoubleArraySize);
+    rChannel=(double*)malloc(widthAndHeightBasedDoubleArraySize);
+    gChannel=(double*)malloc(widthAndHeightBasedDoubleArraySize);
+    bChannel=(double*)malloc(widthAndHeightBasedDoubleArraySize);
+
+    for(int32_t y=0;y<height;y++)
+    {
+        int32_t offset=y*width;
+        for(int32_t x=0;x<width;x++)
+        {
+            uint32_t pos=offset+x;
+            uint32_t color=image[pos];
+            double a=((double)((color>>24)&0xff))/255.0;
+            double r=((double)((color>>16)&0xff))/255.0;
+            double g=((double)((color>>8)&0xff))/255.0;
+            double b=((double)(color&0xff))/255.0;
+            aChannel[pos]=a;
+            rChannel[pos]=r;
+            gChannel[pos]=g;
+            bChannel[pos]=b;
+        }
+    }
 }
 
 uint32_t MainWindow::getRandomColor()
@@ -336,6 +423,11 @@ void MainWindow::groupAreasBtnClicked(bool clicked)
     int32_t kernelSizeInPixels=2*kernelSize+1;
     double sqrtOf3=sqrt(3.0);
 
+    double *rChannel;
+    double *gChannel;
+    double *bChannel;
+    getRGBChannelsFromImage(bmpData,width,height,rChannel,gChannel,bChannel);
+
     for(int32_t y=0;y<height;y++)
     {
         for(int32_t x=0;x<width;x++)
@@ -359,13 +451,9 @@ void MainWindow::groupAreasBtnClicked(bool clicked)
             int32_t lowestErrorX=-1;
             int32_t lowestErrorY=-1;
 
-            uint32_t thisColor=bmpData[thisPos];
-            uint8_t thisRComponent=(thisColor>>16)&0xff;
-            uint8_t thisGComponent=(thisColor>>8)&0xff;
-            uint8_t thisBComponent=thisColor&0xff;
-            double thisR=((double)thisRComponent)/255.0;
-            double thisG=((double)thisGComponent)/255.0;
-            double thisB=((double)thisBComponent)/255.0;
+            double thisR=rChannel[thisPos];
+            double thisG=gChannel[thisPos];
+            double thisB=bChannel[thisPos];
 
             for(int32_t yOfKernel=0;yOfKernel<kernelSizeInPixels;yOfKernel++)
             {
@@ -398,13 +486,9 @@ void MainWindow::groupAreasBtnClicked(bool clicked)
                     if(thisArea!=0xffffffff&&cmpArea==thisArea)
                         continue;
 
-                    uint32_t cmpColor=bmpData[cmpPos];
-                    uint8_t cmpRComponent=(cmpColor>>16)&0xff;
-                    uint8_t cmpGComponent=(cmpColor>>8)&0xff;
-                    uint8_t cmpBComponent=cmpColor&0xff;
-                    double cmpR=((double)cmpRComponent)/255.0;
-                    double cmpG=((double)cmpGComponent)/255.0;
-                    double cmpB=((double)cmpBComponent)/255.0;
+                    double cmpR=rChannel[cmpPos];
+                    double cmpG=gChannel[cmpPos];
+                    double cmpB=bChannel[cmpPos];
 
                     double error=sqrt(pow(thisR-cmpR,2.0)+pow(thisG-cmpG,2.0)+pow(thisB-cmpB,2.0))/sqrtOf3; // Max result: 1.0; max error term: sqrt(3.0)
                     if(error<lowestError)
@@ -475,6 +559,9 @@ void MainWindow::groupAreasBtnClicked(bool clicked)
     filteredImage=getImageFromBmpData(width,height,outputImageData);
     pixmapItem->setPixmap(QPixmap::fromImage(*filteredImage));
     free(outputImageData);
+    free(rChannel);
+    free(gChannel);
+    free(bChannel);
 }
 
 void MainWindow::resetBtnClicked(bool checked)
