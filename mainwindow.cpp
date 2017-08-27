@@ -13,9 +13,9 @@ MainWindow::MainWindow(QWidget *parent) :
     scene->addItem(pixmapItem);
     ui->graphicsView->setScene(scene);
     connect(this,SIGNAL(windowResizedEx(QResizeEvent*)),this,SLOT(fitToWindow()));
-    connect(ui->browseButton,SIGNAL(clicked(bool)),this,SLOT(browseButtonClicked(bool)));
-    connect(ui->groupPixelsBtn,SIGNAL(clicked(bool)),this,SLOT(groupAreasBtnClicked(bool)));
-    connect(ui->resetBtn,SIGNAL(clicked(bool)),this,SLOT(resetBtnClicked(bool)));
+    connect(ui->browseButton,SIGNAL(clicked(bool)),this,SLOT(browseButtonClicked()));
+    connect(ui->groupPixelsBtn,SIGNAL(clicked(bool)),this,SLOT(groupAreasBtnClicked()));
+    connect(ui->resetBtn,SIGNAL(clicked(bool)),this,SLOT(resetBtnClicked()));
     dialog=new QFileDialog(this);
     dialog->setNameFilter("All images (*.jpg *.jpeg *.png *.gif *.bmp *.dib *.tif *.tiff)");
     dialog->setDirectory(QApplication::applicationDirPath());
@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->colorGroupingKernelSizeBox->setValue(1);
     ui->colorGroupingToleranceBox->setValue(0.2);
 
-    QString proposedFile=QApplication::applicationDirPath().replace("/","\\")+"\\example.jpg";
+    QString proposedFile=QApplication::applicationDirPath()+"/example.jpg";
     QFile f(proposedFile);
     if(f.exists())
     {
@@ -356,7 +356,7 @@ int32_t MainWindow::round(double in)
     return in<0.0?((double)in-f>0.5?f+1:f):((double)in-f>=0.5?f+1:f);
 }
 
-void MainWindow::browseButtonClicked(bool checked)
+void MainWindow::browseButtonClicked()
 {
     dialog->exec();
 }
@@ -396,7 +396,7 @@ void MainWindow::fileSelected(QString file)
     fitToWindow();
 }
 
-void MainWindow::groupAreasBtnClicked(bool clicked)
+void MainWindow::groupAreasBtnClicked()
 {
     if(originalImage==0)
         return;
@@ -564,7 +564,7 @@ void MainWindow::groupAreasBtnClicked(bool clicked)
     free(bChannel);
 }
 
-void MainWindow::resetBtnClicked(bool checked)
+void MainWindow::resetBtnClicked()
 {
     if(originalImage==0)
         return;

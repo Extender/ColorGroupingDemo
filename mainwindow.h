@@ -72,10 +72,10 @@ public:
     static int32_t round(double in);
 
 public slots:
-    void browseButtonClicked(bool checked);
+    void browseButtonClicked();
     void fileSelected(QString file);
-    void groupAreasBtnClicked(bool clicked);
-    void resetBtnClicked(bool checked);
+    void groupAreasBtnClicked();
+    void resetBtnClicked();
     void fitToWindow();
     void resetZoom();
 
