@@ -131,7 +131,7 @@
       <item>
        <widget class="QPushButton" name="groupPixelsBtn">
         <property name="text">
-         <string>Group pixels by color</string>
+         <string>Group pixels</string>
         </property>
        </widget>
       </item>
@@ -139,6 +139,13 @@
        <widget class="QPushButton" name="resetBtn">
         <property name="text">
          <string>Reset</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="saveAsBtn">
+        <property name="text">
+         <string>Save as...</string>
         </property>
        </widget>
       </item>

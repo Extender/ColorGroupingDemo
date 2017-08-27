@@ -19,6 +19,7 @@
 #include <QMessageBox>
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
+#include <QStandardPaths>
 
 #include "mainwindowex.h"
 #include "graphicsviewex.h"
@@ -76,6 +77,7 @@ public slots:
     void fileSelected(QString file);
     void groupAreasBtnClicked();
     void resetBtnClicked();
+    void saveAsBtnClicked();
     void fitToWindow();
     void resetZoom();
 

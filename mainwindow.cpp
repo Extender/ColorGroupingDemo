@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->browseButton,SIGNAL(clicked(bool)),this,SLOT(browseButtonClicked()));
     connect(ui->groupPixelsBtn,SIGNAL(clicked(bool)),this,SLOT(groupAreasBtnClicked()));
     connect(ui->resetBtn,SIGNAL(clicked(bool)),this,SLOT(resetBtnClicked()));
+    connect(ui->saveAsBtn,SIGNAL(clicked(bool)),this,SLOT(saveAsBtnClicked()));
     dialog=new QFileDialog(this);
     dialog->setNameFilter("All images (*.jpg *.jpeg *.png *.gif *.bmp *.dib *.tif *.tiff)");
     dialog->setDirectory(QApplication::applicationDirPath());
@@ -571,6 +572,16 @@ void MainWindow::resetBtnClicked()
     pixmapItem->setPixmap(QPixmap::fromImage(*originalImage));
     delete filteredImage;
     filteredImage=0;
+}
+
+void MainWindow::saveAsBtnClicked()
+{
+    if(filteredImage==0)
+        return;
+    QString path=QFileDialog::getSaveFileName(this,"Save as...",QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),"JPG image (*.jpg);;PNG image (*.png);;GIF image (*.gif);;Bitmap (*.bmp)");
+    if(path=="")
+        return;
+    filteredImage->save(path,0,100);
 }
 
 void MainWindow::fitToWindow()
